@@ -1,0 +1,33 @@
+#!/bin/env bash
+
+fetch_rosdistro_cache() {
+	local rosversion=$1
+	local rosdistro=$2
+	local url
+	case $rosversion in
+		ros)
+			url='http://repositories.ros.org/rosdistro_cache'
+			;;
+		ros2)
+			url='http://repo.ros2.org/rosdistro_cache'
+			;;
+		*)
+			echo "Unknown ros version $rosversion" >&2
+			exit 1
+			;;
+	esac
+	local file="${rosdistro}-cache.yaml.gz"
+
+	test -r $file || curl --compressed "${url}/${rosdistro}-cache.yaml.gz" > "$file"
+}
+
+ROS_DISTROS=(indigo kinetic melodic noetic)
+ROS2_DISTROS=(dashing eloquent foxy galactic rolling)
+
+for distro in "${ROS_DISTROS[@]}"; do
+	fetch_rosdistro_cache ros $distro
+done
+
+for distro in "${ROS2_DISTROS[@]}"; do
+	fetch_rosdistro_cache ros2 $distro
+done
